@@ -1,0 +1,25 @@
+    MOV Ax, 0x98
+    Mov Bx, 0D512
+    Add Ax, Bx  
+    mul Ax, smallcon
+    inc Ax
+jmp middle  //comment
+
+Bottom:    Sub Ax, Bx
+    Mov [variable], Ax
+    Mov Bx, Ax #comment
+    Mov SP, Ax
+    OR AX, Bx; comment
+    halt
+
+    middle:
+    Mov [variable], Ax
+    Mov Ax, bigcon
+    Mov Bx, [variable]
+    jmp bottom
+
+smallcon: EQU 0b10
+bigcon: EQU 0xFFFF
+
+    ORG 0b101011001110
+variable: DC.W 0q130013

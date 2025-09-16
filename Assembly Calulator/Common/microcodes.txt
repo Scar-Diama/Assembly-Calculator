@@ -1,0 +1,87 @@
+// Movement
+PC<-[SP]
+PC<-[AX]
+PC<-[BX]
+PC<-[ALUr]
+PC<-[IR.lowbyte]
+PC<-[MDR]
+SP<-[PC]
+SP<-[AX]
+SP<-[BX]
+SP<-[ALUr]
+SP<-[IR.lowbyte]
+SP<-[MDR]
+AX<-[PC]
+AX<-[SP]
+AX<-[BX]
+AX<-[ALUr]
+AX<-[IR.lowbyte]
+AX<-[MDR]
+BX<-[PC]
+BX<-[SP]
+BX<-[AX]
+BX<-[ALUr]
+BX<-[IR.lowbyte]
+BX<-[MDR]
+ALUx<-[PC]
+ALUx<-[SP]
+ALUx<-[AX]
+ALUx<-[BX]
+ALUx<-[ALUr]
+ALUx<-[IR.lowbyte]
+ALUx<-[MDR]
+ALUy<-[PC]
+ALUy<-[SP]
+ALUy<-[AX]
+ALUy<-[BX]
+ALUy<-[ALUr]
+ALUy<-[IR.lowbyte]
+ALUy<-[MDR]
+MAR<-[PC]
+MAR<-[SP]
+MAR<-[AX]
+MAR<-[BX]
+MAR<-[ALUr]
+MAR<-[IR.lowbyte]
+MAR<-[MDR]
+MDR<-[PC]
+MDR<-[SP]
+MDR<-[AX]
+MDR<-[BX]
+MDR<-[ALUr]
+MDR<-[IR.lowbyte]
+IR<-[MDR]
+
+// MEMORY
+MDR<-[M[MAR]]
+M[MAR]<-[MDR]
+
+// ALU
+ALUr=[ALUx]+[ALUy]
+ALUr=[ALUx]-[ALUy]
+ALUr=[ALUx]|[ALUy]
+ALUr=[ALUx]&[ALUy]
+ALUr=[ALUx]*[ALUy]
+ALUr=[ALUx]/[ALUy]
+ALUr=[ALUx]%[ALUy]
+ALUr=[ALUx]+1
+ALUr=[ALUx]-1
+ALUr=~[ALUx]
+ALUr=-[ALUx]
+ALUr=[ALUx]<<1
+ALUr=[ALUx]>>1
+
+
+// Conditions
+IF PSR.Z
+IF NOT PSR.Z
+IF PSR.N
+IF NOT PSR.N
+IF PSR.C
+IF NOT PSR.C		// Not currently used
+IF PSR.V
+IF NOT PSR.V		// Not currently used
+
+// Other
+PC=[PC]+1
+STOP

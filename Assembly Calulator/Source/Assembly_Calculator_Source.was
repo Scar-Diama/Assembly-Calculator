@@ -1,0 +1,1108 @@
+CALL Example
+
+MAINLOOP:
+CALL inputBx        //User Input 1
+CALL printBx        //Print Input
+CALL nextLine       //Space
+
+CALL inputBx2       //User Input 2
+CALL printBx        //Print Input
+CALL nextLine       //Space
+
+CALL QuitCheck
+
+CALL inputSignBx    //User Input Sign
+CALL printBx        //Print Input
+CALL nextLine       //Space
+
+CALL inputBx3       //User Input 3
+CALL printBx        //Print Input
+CALL nextLine       //Space
+
+CALL inputBx4       //User Input 4
+CALL printBx        //Print Input
+CALL nextLine       //Space
+CALL calculationCheckErrorHandle
+
+CALL calculationCheckSign           //ADD, SUB, MULT OR DIV depending on Sign.
+
+CALL AnsConvert            //Displays one Digit Answer
+MOV BX, [TripleDigitCheck] //Checking for 3 digits in answer
+CMP BX, 0x0001
+JEQ TripleDigitAnswer      //If check is true, will jump
+
+CALL printBxAns          //Print single digit. Prints Equals and TAB
+CALL nextLine            //Space. (If not double digit, it will loop back around to start.
+JMP MAINLOOP             //Loop to Start
+
+TripleDigitAnswer:
+CALL printTripleDigit     //Prints Triple digit answer
+CALL nextLine             //Space
+JMP MAINLOOP              //Repeat
+HALT	
+
+ORG 0x0200                //Puts functions etc in memory 0x200 and beyond to avoid any information going into protected memory locations
+
+inputBx:
+MOV AX, [0x00F5]  //ISR. Check if there is something to read.
+CMP AX, 0x0000    
+JEQ inputBx       //If not, repeat
+MOV BX, [0x00F3]   //Put ASCII Value into BX. F3 is the user's input
+SUB BX, 0x0030
+MOV [Numb1], BX   //Storing Input in variable
+MOV BX, [Numb1]
+ADD BX, 0x0030
+MOV AX, 0x0000
+MOV [0x00F5], AX  //SET ISR to 0
+RET
+
+inputBx2:
+MOV AX, [0x00F5]  //ISR. Check if there is something to read.
+CMP AX, 0x0000    
+JEQ inputBx2       //If not, repeat
+MOV BX, [0x00F3]   //Put ASCII Value into BX. F3 is the user's input
+SUB BX, 0x0030
+MOV [Numb2], BX   //Storing Input in variable
+MOV BX, [Numb2]
+ADD BX, 0x0030
+MOV AX, 0x0000
+MOV [0x00F5], AX  //SET ISR to 0
+RET
+
+inputBx3:
+MOV AX, [0x00F5]  //ISR. Check if there is something to read.
+CMP AX, 0x0000    
+JEQ inputBx3       //If not, repeat
+MOV BX, [0x00F3]   //Put ASCII Value into BX. F3 is the user's input
+SUB BX, 0x0030
+MOV [Numb3], BX    //Storing Input in variable
+MOV BX, [Numb3]
+ADD BX, 0x0030
+MOV AX, 0x0000
+MOV [0x00F5], AX   //SET ISR to 0
+RET
+
+inputBx4:
+MOV AX, [0x00F5]   //ISR. Check if there is something to read.
+CMP AX, 0x0000    
+JEQ inputBx4       //If not, repeat
+MOV BX, [0x00F3]   //Put ASCII Value into BX. F3 is the user's input
+SUB BX, 0x0030
+MOV [Numb4], BX    //Storing Input in variable
+MOV BX, [Numb4]
+ADD BX, 0x0030
+MOV AX, 0x0000
+MOV [0x00F5], AX   //SET ISR to 0
+RET
+
+inputSignBx:
+MOV AX, [0x00F5]   //ISR. Check if there is something to read.
+CMP AX, 0x0000    
+JEQ inputSignBx    //If not, repeat
+MOV BX, [0x00F3]   //Put ASCII Value into BX. F3 is the user's input
+MOV [Sign], BX     //Storing Input in variable
+MOV BX, [Sign]
+MOV AX, 0x0000
+MOV [0x00F5], AX   //SET ISR to 0
+RET
+
+QuitCheck:
+MOV AX, [Numb1]  
+MOV BX, [Numb2]
+ADD AX, BX        //Will add Numb1 and Numb2 together. If they equal F0 then the user wants to quit (they put in xx)
+CMP AX, 0x0090
+JEQ Quit
+RET
+
+calculationCheckSign:
+MOV AX, [Sign]     //Sign into AX
+CMP AX, 0x002B     //If Plus
+JEQ calcAdd        //Jump to add calc
+CMP AX, 0x002D     //If Minus
+JEQ calcSub        //Jump to Sub calc
+RET
+
+CalcAdd:
+MOV AX, 0x0000     //0 into ax
+MOV [Sign], AX     //Clears sign
+MOV AX, [Numb1]    //Number 1 into AX
+MOV BX, [Numb3]    //Number 3 into BX
+CMP AX, 0x0000
+CMP BX, 0x0000
+JEQ SingleDigitAddition
+ADD AX, BX         //ADD Hex
+MOV [Numb1And3], AX
+MOV AX, [Numb2]    //Number 2 into AX
+MOV BX, [Numb4]    //Number 4 into BX
+ADD AX, BX 
+MOV [Numb2And4], AX
+RET
+
+SingleDigitAddition:
+MOV BX, [Numb1]    //Get number 1
+MOV AX, [Numb3]    //Get number 3
+ADD BX, AX         //Add
+MOV [Ans2], BX
+
+MOV AX, [Numb2]    //Get number 2
+MOV BX, [Numb4]    //Get number 4
+ADD AX, BX         //Add           
+MOV [Ans3], AX
+MOV AX, [Ans3]
+CMP AX, 0x000A
+JGE doubleDigitConvert
+ADD AX, 0x0030
+MOV [Ans3], AX 
+JMP printDoubleDigit
+RET
+
+CalcSub:
+MOV AX, 0x0000     //0 into ax
+MOV [Sign], AX     //Clears sign
+MOV AX, [Numb1]    //Number 1 into AX
+MOV BX, [Numb3]    //Number 3 into BX
+CMP AX, 0x0000     //If either numbers are 0. Note, i need to do both seperatly.
+CMP BX, 0x0000
+JEQ SingleDigitSubtraction
+SUB AX, BX           //Sub Hex
+MOV [Numb1And3], AX  //Mov to combined answer
+MOV AX, [Numb2]      //Number 2 into AX
+MOV BX, [Numb4]      //Number 4 into BX
+SUB AX, BX           //Sub
+MOV [Numb2And4], AX  //Move into combined answer
+RET
+
+SingleDigitSubtraction:
+MOV AX, [Numb2]      //Numb2 into AX
+MOV BX, [Numb4]      //Numb4 into BX
+SUB AX, BX           //Sub
+MOV [Ans3], AX       //Move into Ans3 (First digit on screen)
+MOV AX, [Ans3]       //Move back into AX
+CMP AX, 0x000A       //Compare with 10.
+JGE doubleDigitConvert //If greater than 10, jump to convert
+ADD AX, 0x0030       //Else add 30 for ascii
+MOV [Ans3], AX       //Store Answer
+JMP printDoubleDigit //Jump!
+RET
+
+AnsConvert:
+MOV AX, [Numb1And3]   //Hex ans into AX
+CMP AX, 0x000A
+JGE TripleDigitConvert
+ADD AX, 0x0030        //Add 30 for ASCII
+MOV [Ans], AX         //Move answer to ans
+MOV AX, 0x0000        //Clear AX
+MOV AX, [Numb2And4]   //Repeat process but for ans2
+CMP AX, 0x000A
+JGE doubleDigitConvert2
+ADD AX, 0x0030        //Add 30 for ASCII
+CMP AX, 0x0030        //Compare with 30
+JL NegNumbCarry       //If lower than 30, Jump!
+MOV [Ans2], AX
+RET
+
+NegNumbCarry:
+MOV BX, [Ans]         //Move Ans to BX
+SUB BX, 0x0001        //Subtract 1
+MOV [Ans], BX         //Move back into Ans
+ADD AX, 0x000A        //Add 10 to BX to make up for negative
+MOV [Ans2], AX        //Store back into ans
+RET
+
+TripleDigitConvert:
+MOV AX, [Numb1And3]
+MOV BX, 0x000A        //Moves 10 into BX
+DIV AX, BX            //Divides answer by 10. Getting MSD (First Digit)
+ADD AX, 0x0030        //Adds 30 for ASCII Value
+MOV [Ans], AX         //Stores it
+MOV AX, [Numb1And3]   //Answer back into AX
+MOD AX, 0x000A        //Getting LSD (The right most digit. Aka the remainder)
+ADD AX, 0x0030        //Adds 30 for ASCII Value
+MOV [Ans2], AX        //Stores it
+MOV AX, [Numb2And4]   //Moves second answer into AX
+CMP AX, 0x000A        //Compare with 10
+JGE StepTwoConvert    //IF greater than or equal, jump
+ADD AX, 0x0030        //Add 30 for ascii
+MOV [Ans3], AX        //Move to Ans3 (first digit on screen)
+MOV BX, [TripleDigitCheck]  //Move check into BX
+MOV BX, 0x0001 
+MOV [TripleDigitCheck], BX  //Moves 1 into check
+RET
+
+StepTwoConvert:
+MOV AX, [Numb2And4]
+MOV BX, 0x000A     //Moves 10 into BX
+DIV AX, BX         //Divides answer by 10. Getting MSD (First Digit)
+MOV BX, [Ans2]
+SUB BX, 0x0030
+ADD BX, AX
+ADD BX, 0x0030
+MOV [Ans2], BX
+MOV AX, [Numb2And4]      //Answer back into AX
+MOD AX, 0x000A           //Getting LSD (The right most digit. Aka the remainder)       
+ADD AX, 0x0030
+MOV [Ans3], AX           //Stores it
+MOV BX, [TripleDigitCheck]  
+MOV BX, 0x0001 
+MOV [TripleDigitCheck], BX
+JMP printTripleDigit
+RET
+
+doubleDigitConvert2:
+MOV AX, [Numb2And4]      //Hex Answer into AX
+MOV BX, 0x000A           //Moves 10 into BX
+DIV AX, BX               //Divides answer by 10. Getting MSD (First Digit)
+PUSH AX                  //Stores it
+MOV AX, [Numb2And4]      //Answer back into AX
+MOD AX, 0x000A           //Getting LSD (The right most digit. Aka the remainder)
+ADD AX, 0x0030           //Adds 30 for ASCII Value
+MOV [Ans3], AX           //Stores it
+POP AX
+ADD AX, 0x0030
+MOV BX, [Ans]
+SUB BX, 0x0030
+ADD BX, AX
+MOV [Ans2], BX
+JMP printDoubleDigit
+RET
+
+doubleDigitConvert:
+MOV AX, [Ans3]      //Hex Answer into AX
+MOV BX, 0x000A     //Moves 10 into BX
+DIV AX, BX         //Divides answer by 10. Getting MSD (First Digit)
+PUSH AX            //Stores it
+MOV AX, [Ans3]      //Answer back into AX
+MOD AX, 0x000A     //Getting LSD (The right most digit. Aka the remainder)
+ADD AX, 0x0030     //Adds 30 for ASCII Value
+MOV [Ans3], AX    //Stores it
+POP AX
+MOV BX, [Ans2]
+ADD AX, BX
+ADD AX, 0x0030
+MOV [Ans2], AX
+JMP printDoubleDigit
+RET
+
+printBx:
+MOV AX, [0x00F2]
+CMP AX, 0x0000
+JNE printBx
+MOV [0x00F0], BX
+MOV AX, 0x0001
+MOV [0x00F2], AX
+RET
+
+nextLine:
+MOV BX, 0x0020
+MOV [0x00F3], BX   //Put ASCII Value into BX. F3 is the user's input
+MOV BX, 0x0000     //Set BX back to 0
+MOV AX, 0x0000
+MOV [0x00F5], AX   //SET ISR to 0
+RET
+
+printTripleDigit:
+MOV AX, [0x00F2]
+CMP AX, 0x0000
+JNE printTripleDigit
+MOV BX, 0x003D    //Getting "=" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans]       //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(T1)           //If 0, add 30
+JMP skipAdd(T1)         //If not, skip
+add30(T1):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(T1):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans2]       //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(T2)           //If 0, add 30
+JMP skipAdd(T2)         //If not, skip
+add30(T2):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(T2):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans3]       //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(T3)           //If 0, add 30
+JMP skipAdd(T3)         //If not, skip
+add30(T3):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(T3):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0009    //Hex for TAB (Space for next Input)
+MOV [0x00F0], BX
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+JMP clearMemory
+RET
+
+printDoubleDigit:
+MOV AX, [0x00F2]
+CMP AX, 0x0000
+JNE printDoubleDigit
+MOV BX, 0x003D    //Getting "=" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans2]       //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(D2)           //If 0, add 30
+JMP skipAdd(D2)         //If not, skip
+add30(D2):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(D2):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans3]       //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(D3)           //If 0, add 30
+JMP skipAdd(D3)         //If not, skip
+add30(D3):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(D3):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0009    //Hex for TAB (Space for next Input)
+MOV [0x00F0], BX
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+JMP clearMemory
+RET
+
+printBxAns:
+MOV AX, [0x00F2]
+CMP AX, 0x0000
+JNE printBxAns
+MOV BX, 0x003D    //Getting "=" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans]     //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(S1)           //If 0, add 30
+JMP skipAdd(S1)         //If not, skip
+add30(S1):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(S1):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, [Ans2]     //Getting Answer from calc
+CMP BX, 0x0000      //Comparing with 0
+JEQ add30(S2)           //If 0, add 30
+JMP skipAdd(S2)         //If not, skip
+add30(S2):              //Add 30 Jump
+ADD BX, 0x0030      //Add 30
+skipAdd(S2):            //Skip
+MOV [0x00F0], BX    //Printing Answer
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0009    //Hex for TAB (Space for next Input)
+MOV [0x00F0], BX
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+JMP clearMemory
+RET
+
+calculationCheckErrorHandle:
+MOV AX, [Numb1]    //Ans to AX
+MOV BX, [Numb2]    //Ans2 into BX
+ADD AX, 0x0030
+ADD BX, 0x0030
+CMP AX, 0x0040 
+JGE ErrorHandle    //Compare
+CMP BX, 0x0040
+JGE ErrorHandle    //If equal or greater than 40, Error
+CMP AX, 0x0030     //Compare
+JL ErrorHandle 
+CMP BX, 0x0030
+JL ErrorHandle     //If less than 30, error
+MOV AX, [Numb3]    //Ans to AX
+MOV BX, [Numb4]    //Ans2 into BX
+ADD AX, 0x0030
+ADD BX, 0x0030
+CMP AX, 0x0040     //Compare
+JGE ErrorHandle
+CMP BX, 0x0040
+JGE ErrorHandle    //If equal or greater than 40, Error
+CMP AX, 0x0030     //Compare
+JL ErrorHandle
+CMP BX, 0x0030
+JL ErrorHandle     //If less than 30, error
+MOV AX, [Sign]     //Ans2 into BX
+CMP AX, 0x002E     //Compare
+JGE ErrorHandle
+CMP AX, 0x002A
+JL ErrorHandle     //If equal or greater than 40, Error
+RET
+
+ErrorHandle:
+MOV AX, 0x0000     //Clearing all data
+MOV [Numb1], AX
+MOV [Numb2], AX
+MOV [Numb3], AX
+MOV [Numb4], AX 
+MOV [Numb1And3], AX
+MOV [Numb2And4], AX
+MOV [Sign], AX                                
+MOV BX, 0x003D    //Getting "=" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0045    //Getting "E" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0072    //Getting "r" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0072    //Getting "r" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x006F    //Getting "o" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0072    //Getting "r" sign
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0009    //Hex for TAB (Space for next Input)
+MOV [0x00F0], BX
+MOV AX, 0x0001    
+MOV [0x00F2], AX
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+JMP clearMemory
+RET
+
+clearMemory:
+MOV AX, 0x0000     //Clearing all data
+MOV [Numb1], AX
+MOV [Numb2], AX
+MOV [Numb3], AX
+MOV [Numb4], AX 
+MOV [Numb1And3], AX
+MOV [Numb2And4], AX
+MOV [Sign], AX  
+MOV [Ans], AX
+MOV [Ans2], AX
+MOV [Ans3], AX 
+MOV [TripleDigitCheck], AX 
+JMP MAINLOOP
+RET
+
+Example:
+MOV BX, 'E'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'x'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'a'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'm'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'p'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'l'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'e'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, ':'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, '0'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, '1'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, '+'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, '0'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, '9'
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0020    //Space   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'x'    
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'x'    
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0020    
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 't'    
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'o'    
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0020     
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'q'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'u'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'i'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 't'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0009
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+RET
+
+Quit:
+MOV BX, 'Y'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'o'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'u'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 0x0020    //Space   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'Q'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'u'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 'i'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+MOV BX, 't'   
+MOV [0x00F0], BX  //Printing
+MOV AX, 0x0001    //Moving 1 to AX
+MOV [0x00F2], AX  //Ready to read again
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+HALT
+RET
+
+Numb1: DC.W 0x0000    //User Digit Input 1
+Numb2: DC.W 0x0000    //User Digit Input 2
+Numb3: DC.W 0x0000    //User Digit Input 3
+Numb4: DC.W 0x0000    //User Digit Input 4
+Numb1And3: DC.W 0x0000 
+Numb2And4: DC.W 0x0000 
+Sign: DC.W 0x0000     //Sign Input for calculation
+Ans: DC.W 0x0000      //Answer Output Digit 1
+Ans2: DC.W 0x0000     //Answer Output Digit 2
+Ans3: DC.W 0x0030     //Answer Output Digit 3
+TripleDigitCheck: DC.W 0x0000 

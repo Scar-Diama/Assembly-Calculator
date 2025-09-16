@@ -1,0 +1,1519 @@
+// This is a version of the instruction set, which is closer
+// to AT&T syntax
+// To use this, you will also need to replace sting.cfg with sting AT&T.cfg
+
+// CAUTION! We have not tested this carefully. Use at your own risk.
+
+
+
+/////////////////////////////////////////////////
+// Define the fetch operation
+/////////////////////////////////////////////////
+{FETCH}
+* Fetch instruction.
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+IR<-[MDR]
+
+///////////////////////////////////////////////////////
+// No OP
+///////////////////////////////////////////////////////
+
+[00]		// Opcode
+NOP		// Mnemonic
+* No-operation
+
+///////////////////////////////////////////////////////
+// Moving to AX
+///////////////////////////////////////////////////////
+	
+[01]
+MOV %BX,%AX
+* Copies the contents of register BX into register AX
+AX<-[BX]
+
+[02]
+MOV (%BX),%AX
+* Copies the value of the memory address indexed by register BX into register AX
+MAR<-[BX]
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+[03]
+MOV (%AX),%AX
+* Copies the value of the memory address indexed by register AX into register AX
+MAR<-[AX]
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+[04]
+MOV %SP,%AX
+* Copies the contents of register SP into register AX
+AX<-[SP]
+
+[05]
+MOV $operand,%AX
+* Copies the value of the $operand into register AX
+AX<-[IR.$operand]
+
+[06]
+MOV ($operand),%AX
+* Copies the value of the memory address indexed by the $operand into register AX
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+[07]
+MOV $word,%AX
+* Copies the value of the following $word into register AX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+[08]
+MOV ($word),%AX
+* Copies the value of the memory addressed indexed by the following $word into register AX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+/////////////////////////////////////////////////
+// Moving to BX
+/////////////////////////////////////////////////
+		
+[09]
+MOV %AX,%BX
+* Copies the contents of register AX into register BX
+BX<-[AX]
+
+[0A]
+MOV (%AX),%BX
+* Copies the value of the memory address indexed by register AX into register BX
+MAR<-[AX]
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+[0B]
+MOV (%BX),%BX
+* Copies the value of the memory address indexed by register BX into register BX
+MAR<-[BX]
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+[0C]
+MOV %SP,%BX
+* Copies the contents of register SP into register BX
+BX<-[SP]
+
+[0D]
+MOV $operand,%BX
+* Copies the value of the $operand into register BX
+BX<-[IR.$operand]
+
+[0E]
+MOV ($operand),%BX
+* Copies the value of the memory address indexed by the $operand into register BX
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+[0F]
+MOV $word,%BX
+* Copies the value of the following $word into register BX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+[10]
+MOV ($word),%BX
+* Copies the value of the memory addressed indexed by the following $word into register BX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+
+
+/////////////////////////////////////////////////
+// Moving to SP
+/////////////////////////////////////////////////
+		
+[11]
+MOV %AX,%SP
+* Copies the contents of register AX into the stack pointer
+SP<-[AX]
+
+[12]
+MOV %BX,%SP
+* Copies the contents of register BX into the stack pointer
+SP<-[BX]
+
+[13]
+MOV $operand,%SP
+* Copies the value of the $operand into the stack pointer
+SP<-[IR.$operand]
+
+[14]
+MOV ($operand),%SP
+* Copies the value of the address indexed by the $operand into the stack pointer
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+SP<-[MDR]
+
+[15]
+MOV $word,%SP
+* Copies the value of the following $word into the stack pointer
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+SP<-[MDR]
+
+[16]
+MOV ($word),%SP
+* Copies the value of the memory addressed indexed by the following $word into the stack pointer
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+SP<-[MDR]
+
+
+/////////////////////////////////////////////////
+// Moving to memory
+/////////////////////////////////////////////////
+
+[17]
+MOV %BX,(%AX)
+* Copies the value of BX to the memory addressed indexed by AX
+MAR<-[AX]
+MDR<-[BX]
+M[MAR]<-[MDR]
+
+[18]
+MOV %AX,(%BX)
+* Copies the value of AX to the memory addressed indexed by BX
+MAR<-[BX]
+MDR<-[AX]
+M[MAR]<-[MDR]
+
+[19]
+MOV %AX,($operand)
+* Copies the value of AX to the memory addressed indexed by the $operand
+MAR<-[IR.$operand]
+MDR<-[AX]
+M[MAR]<-[MDR]
+
+[1A]
+MOV %AX,($word)
+* Copies the value of AX to the memory addressed indexed by the following $word
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[AX]
+M[MAR]<-[MDR]
+
+
+[1B]
+MOV %BX,($operand)
+* Copies the value of BX to the memory addressed indexed by the $operand
+MAR<-[IR.$operand]
+MDR<-[BX]
+M[MAR]<-[MDR]
+
+[1C]
+MOV %BX,($word)
+* Copies the value of BX to the memory address indexed by the following $word
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[BX]
+M[MAR]<-[MDR]
+
+[1D]
+MOV %SP,($operand)
+* Copies the value of the stack pointer to the memory addressed indexed by the $operand
+MAR<-[IR.$operand]
+MDR<-[SP]
+M[MAR]<-[MDR]
+
+[1E]
+MOV %SP,($word)
+* Copies the value of the stack pointer to the memory addressed indexed by the following $word
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[SP]
+M[MAR]<-[MDR]
+
+
+[20]
+MOV $operand,(%AX)
+* Moves the value of the byte into memory location specified by AX
+MDR<-[IR.lowbyte]
+MAR<-[AX]
+M[MAR]<-[MDR]
+
+[21]
+MOV $word,(%AX)
+* Moves the value of the word into memory location specified by AX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[AX]
+M[MAR]<-[MDR]
+
+
+[28]
+MOV $operand,(%BX)
+* Moves the value of the word into memory location specified by BX
+MDR<-[IR.lowbyte]
+MAR<-[BX]
+M[MAR]<-[MDR]
+
+[29]
+MOV $word,(%BX)
+* Moves the value of the word into memory location specified by BX
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[BX]
+M[MAR]<-[MDR]
+
+
+/////////////////////////////////////////////////
+// Adding to AX
+/////////////////////////////////////////////////
+
+[30]
+ADD $operand,%AX
+* Adds the $operand to register AX
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]+[ALUy]
+AX<-[ALUr]
+
+[31]
+ADD ($operand),%AX
+* Adds the contents of the memory location specified by the $operand to register AX
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]+[ALUy]
+AX<-[ALUr]
+
+[32]
+ADD %BX,%AX
+* Adds the contents of BX to register AX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]+[ALUy]
+AX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Adding to BX
+/////////////////////////////////////////////////
+
+[33]
+ADD $operand,%BX
+* Adds the $operand to register AX
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]+[ALUy]
+BX<-[ALUr]
+
+[34]
+ADD ($operand),%BX
+* Adds the contents of the memory location specified by the $operand to register AX
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]+[ALUy]
+BX<-[ALUr]
+
+[35]
+ADD %AX,%BX
+* Adds the contents of AX to register BX
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]+[ALUy]
+BX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Subtracting from AX
+/////////////////////////////////////////////////
+
+[38]
+SUB $operand,%AX
+* Subtracts the $operand from register AX
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]-[ALUy]
+AX<-[ALUr]
+
+[39]
+SUB ($operand),%AX
+* Subtracts the contents of the memory location specified by the $operand from register AX
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]-[ALUy]
+AX<-[ALUr]
+
+[3A]
+SUB %BX,%AX
+* Subtracts the contents of BX from register AX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]-[ALUy]
+AX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Subtracting from BX
+/////////////////////////////////////////////////
+
+[3B]
+SUB $operand,%BX
+* Subtracts the $operand from register BX
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]-[ALUy]
+BX<-[ALUr]
+
+[3C]
+SUB ($operand),%BX
+* Subtracts the contents of the memory location specified by the $operand from register BX
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]-[ALUy]
+BX<-[ALUr]
+
+[3D]
+SUB %AX,%BX
+* Subtracts the contents of AX from register BX
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]-[ALUy]
+BX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Bitwise OR to AX
+/////////////////////////////////////////////////
+
+[40]
+OR $operand,%AX
+* Calculates the bitwise OR on AX and the $operand, with result in AX
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]|[ALUy]
+AX<-[ALUr]
+
+[41]
+OR ($operand),%AX
+* Calculates the bitwise OR on AX and the memory address inxexed by the $operand, with result in AX
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]|[ALUy]
+AX<-[ALUr]
+
+[42]
+OR %BX,%AX
+* Calculates the bitwise OR on AX and BX, with result in AX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]|[ALUy]
+AX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Bitwise OR to BX
+/////////////////////////////////////////////////
+
+[43]
+OR $operand,%BX
+* Calculates the bitwise OR on BX and the $operand, with result in BX
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]|[ALUy]
+BX<-[ALUr]
+
+[44]
+OR ($operand),%BX
+* Calculates the bitwise OR on BX and the memory address inxexed by the $operand, with result in BX
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]|[ALUy]
+BX<-[ALUr]
+
+[45]
+OR %AX,%BX
+* Calculates the bitwise OR on BX and AX, with result in BX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]|[ALUy]
+BX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Bitwise AND to AX
+/////////////////////////////////////////////////
+
+[46]
+AND $operand,%AX
+* Calculates the bitwise AND on AX and the $operand, with result in AX
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]&[ALUy]
+AX<-[ALUr]
+
+[47]
+AND ($operand),%AX
+* Calculates the bitwise AND on AX and the memory address inxexed by the $operand, with result in AX
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]&[ALUy]
+AX<-[ALUr]
+
+[48]
+AND %BX,%AX
+* Calculates the bitwise AND on AX and BX, with result in AX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]&[ALUy]
+AX<-[ALUr]
+
+
+/////////////////////////////////////////////////
+// Bitwise AND to BX
+/////////////////////////////////////////////////
+
+[49]
+AND $operand,%BX
+* Calculates the bitwise AND on BX and the $operand, with result in BX
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]&[ALUy]
+BX<-[ALUr]
+
+[4A]
+AND ($operand),%BX
+* Calculates the bitwise AND on BX and the memory address inxexed by the $operand, with result in BX
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]&[ALUy]
+BX<-[ALUr]
+
+[4B]
+AND %AX,%BX
+* Calculates the bitwise AND on BX and AX, with result in BX
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]&[ALUy]
+BX<-[ALUr]
+
+
+/////////////////////////////////////////////////////
+// MUL
+/////////////////////////////////////////////////////
+
+[50]
+MUL $operand,%AX
+* Multiplies AX by the $operand. Result in AX. Overflow ignored.
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]*[ALUy]
+AX<-[ALUr]
+
+[51]
+MUL $operand,%BX
+* Multiplies BX by the $operand. Result in BX. Overflow ignored.
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]*[ALUy]
+BX<-[ALUr]
+
+[52]
+MUL %BX,%AX
+* Multiplies AX by BX Result in AX. Overflow ignored.
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]*[ALUy]
+AX<-[ALUr]
+
+[53]
+MUL %AX,%BX
+* Multiplies BX by AX. Result in BX. Overflow ignored.
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]*[ALUy]
+BX<-[ALUr]
+
+[54]
+MUL ($operand),%AX
+* Multiplies AX by the contents of the memory location specified by the $operand. Result in AX. Overflow ignored.
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]*[ALUy]
+AX<-[ALUr]
+
+[55]
+MUL ($operand),%BX
+* Multiplies BX by the contents of the memory location specified by the $operand. Result in BX. Overflow ignored.
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]*[ALUy]
+BX<-[ALUr]
+
+
+/////////////////////////////////////////////////////
+// DIV
+/////////////////////////////////////////////////////
+
+[56]
+DIV $operand,%AX
+* Integer divides AX by the $operand. Result in AX. 
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]/[ALUy]
+AX<-[ALUr]
+
+[57]
+DIV $operand,%BX
+* Integer divides BX by the $operand. Result in BX.
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]/[ALUy]
+BX<-[ALUr]
+
+[58]
+DIV %BX,%AX
+* Integer divides AX by BX Result in AX.
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]/[ALUy]
+AX<-[ALUr]
+
+[59]
+DIV %AX,%BX
+* Integer divides BX by AX. Result in BX. 
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]/[ALUy]
+BX<-[ALUr]
+
+[5A]
+DIV ($operand),%AX
+* Integer divides AX by the contents of the memory location specified by the $operand. Result in AX. 
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]/[ALUy]
+AX<-[ALUr]
+
+[5B]
+DIV ($operand),%BX
+* Integer divides BX by the contents of the memory location specified by the $operand. Result in BX. Overflow ignored.
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]/[ALUy]
+BX<-[ALUr]
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// MOD
+///////////////////////////////////////////////////////////////////////////////////////
+
+[5C]
+MOD $operand,%AX
+* Reminder of division of AX by the $operand. Result in AX. 
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]%[ALUy]
+AX<-[ALUr]
+
+[5D]
+MOD $operand,%BX
+* Reminder of division of BX by the $operand. Result in BX.
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]%[ALUy]
+BX<-[ALUr]
+
+[5E]
+MOD %BX,%AX
+* Reminder of division of AX by BX Result in AX.
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]%[ALUy]
+AX<-[ALUr]
+
+[5F]
+MOD %AX,%BX
+* Reminder of division of BX by AX. Result in BX. 
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]%[ALUy]
+BX<-[ALUr]
+
+[60]
+MOD ($operand),%AX
+* Reminder of division of AX by the contents of the memory location specified by the $operand. Result in AX. 
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]%[ALUy]
+AX<-[ALUr]
+
+[61]
+MOD ($operand),%BX
+* Reminder of division of BX by the contents of the memory location specified by the $operand. Result in BX. Overflow ignored.
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]%[ALUy]
+BX<-[ALUr]
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// SHL
+///////////////////////////////////////////////////////////////////////////////////////
+
+[62]
+SHL %AX
+* Shifts left AX by one bit. (Effectively multiplying by 2)
+ALUx<-[AX]
+ALUr=[ALUx]<<1
+AX<-[ALUr]
+
+[63]
+SHL %BX
+* Shifts left BX by one bit. (Effectively multiplying by 2)
+ALUx<-[BX]
+ALUr=[ALUx]<<1
+BX<-[ALUr]
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// SHR
+///////////////////////////////////////////////////////////////////////////////////////
+
+[64]
+SHR %AX
+* Shifts right AX by one bit. (Effectively dividing by 2)
+ALUx<-[AX]
+ALUr=[ALUx]>>1
+AX<-[ALUr]
+
+[65]
+SHR %BX
+* Shifts right BX by one bit. (Effectively dividing by 2)
+ALUx<-[BX]
+ALUr=[ALUx]>>1
+BX<-[ALUr]
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// INC 
+///////////////////////////////////////////////////////////////////////////////////////
+
+[66]
+INC %AX
+* Increments AX.
+ALUx<-[AX]
+ALUr=[ALUx]+1
+AX<-[ALUr]
+
+[67]
+INC %BX
+* Increments BX.
+ALUx<-[BX]
+ALUr=[ALUx]+1
+BX<-[ALUr]
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// DEC
+///////////////////////////////////////////////////////////////////////////////////////
+
+[68]
+DEC %AX
+* Decrements AX.
+ALUx<-[AX]
+ALUr=[ALUx]-1
+AX<-[ALUr]
+
+[69]
+DEC %BX
+* Decrements BX.
+ALUx<-[BX]
+ALUr=[ALUx]-1
+BX<-[ALUr]
+
+///////////////////////////////////////////////////////////////////////////////////////
+// NEG
+///////////////////////////////////////////////////////////////////////////////////////
+
+[6A]
+NEG %AX
+* Twos complement negation of AX
+ALUx<-[AX]
+ALUr=-[ALUx]
+AX<-[ALUr]
+
+[6B]
+NEG %BX
+* Twos complement negation of BX
+ALUx<-[BX]
+ALUr=-[ALUx]
+BX<-[ALUr]
+
+///////////////////////////////////////////////////////////////////////////////////////
+// NOT
+///////////////////////////////////////////////////////////////////////////////////////
+[6C]
+NOT %AX
+* Bitwise negation of AX
+ALUx<-[AX]
+ALUr=~[ALUx]
+AX<-[ALUr]
+
+[6D]
+NOT %BX
+* Bitwise negation of BX
+ALUx<-[BX]
+ALUr=~[ALUx]
+BX<-[ALUr]
+
+///////////////////////////////////////////////////////////////////////////////////////
+// CMP
+///////////////////////////////////////////////////////////////////////////////////////
+
+[70]
+CMP $operand,%AX
+* Subtracts the $operand from register AX, setting PSR but not recording result.
+ALUx<-[AX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]-[ALUy]
+
+[71]
+CMP ($operand),%AX
+* Subtracts the contents of the memory location specified by the $operand from register AX , setting PSR but not recording result.
+ALUx<-[AX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]-[ALUy]
+
+[72]
+CMP %BX,%AX
+* Subtracts the contents of BX from register AX, setting PSR but not recording result.
+ALUx<-[AX]
+ALUy<-[BX]
+ALUr=[ALUx]-[ALUy]
+
+[73]
+CMP $operand,%BX
+* Subtracts the $operand from register BX, setting PSR but not recording result.
+ALUx<-[BX]
+ALUy<-[IR.$operand]
+ALUr=[ALUx]-[ALUy]
+
+[74]
+CMP ($operand),%BX
+* Subtracts the contents of the memory location specified by the $operand from register BX, setting PSR but not recording result.
+ALUx<-[BX]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+ALUy<-[MDR]
+ALUr=[ALUx]-[ALUy]
+
+[75]
+CMP %AX,%BX
+* Subtracts the contents of AX from register BX, setting PSR but not recording result.
+ALUx<-[BX]
+ALUy<-[AX]
+ALUr=[ALUx]-[ALUy]
+
+//////////////////////////////////////////////////////////////////////////////
+// JMP
+//////////////////////////////////////////////////////////////////////////////
+
+[80]
+JMP %AX
+* Unconditional jump to direct address in AX
+PC<-[AX]
+
+[81]
+JMP %BX
+* Unconditional jump to direct address in BX
+PC<-[BX]
+
+[82]
+JMP (%AX)
+* Unconditional jump to indirect address in AX
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[83]
+JMP (%BX)
+* Unconditional jump to indirect address in BX
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[84]
+JMP $operand
+* Unconditional jump to direct address in $operand
+PC<-[IR.$operand]
+
+[85]
+JMP ($operand)
+* Unconditional jump to indirect address in $operand
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[86]
+JMP $word
+* Unconditional jump to direct address in following $word
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[87]
+JMP ($word)
+* Unconditional jump to indirect address in following $word
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Conditional jump
+////////////////////////////////////////////////////////////////////////////////
+
+// JEQ
+[88]
+JEQ %AX
+* Jump to address in AX if zero flag (PSR.Z) is set
+IF PSR.Z
+PC<-[AX]
+
+[89]
+JEQ (%AX)
+* Jump to indirect address in AX if zero flag (PSR.Z) is set
+IF PSR.Z
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[8A]
+JEQ %BX
+* Jump to address in BX if zero flag (PSR.Z) is set
+IF PSR.Z
+PC<-[BX]
+
+[8B]
+JEQ (%BX)
+* Jump to indirect address in BX if zero flag (PSR.Z) is set
+IF PSR.Z
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[8C]
+JEQ $operand
+* Jump to address in $operand if zero flag (PSR.Z) is set
+IF PSR.Z
+PC<-[IR.$operand]
+
+[8D]
+JEQ ($operand)
+* Jump to indirect address in $operand if zero flag (PSR.Z) is set
+IF PSR.Z
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[8E]
+JEQ $word
+* Jump to address in following $word if zero flag (PSR.Z) is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.Z
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[8F]
+JEQ ($word)
+* Jump to indirect address in following $word if zero flag (PSR.Z) is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.Z
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+// JNE
+[90]
+JNE %AX
+* Jump to address in AX if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+PC<-[AX]
+
+[91]
+JNE (%AX)
+* Jump to indirect address in AX if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[92]
+JNE %BX
+* Jump to address in BX if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+PC<-[BX]
+
+[93]
+JNE (%BX)
+* Jump to indirect address in BX if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[94]
+JNE $operand
+* Jump to address in $operand if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+PC<-[IR.$operand]
+
+[95]
+JNE ($operand)
+* Jump to indirect address in $operand if zero flag (PSR.Z) is not set
+IF NOT PSR.Z
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[96]
+JNE $word
+* Jump to address in following $word if zero flag (PSR.Z) is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.Z
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[97]
+JNE ($word)
+* Jump to indirect address in following $word if zero flag (PSR.Z) is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.Z
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+// JL
+[98]
+JL %AX
+* Jump to address in AX if negative flag (PSR.N) is set
+IF PSR.N
+PC<-[AX]
+
+[99]
+JL (%AX)
+* Jump to indirect address in AX if negative flag (PSR.N) is set
+IF PSR.N
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[9A]
+JL %BX
+* Jump to address in BX if negative flag (PSR.N) is set
+IF PSR.N
+PC<-[BX]
+
+[9B]
+JL (%BX)
+* Jump to indirect address in BX if negative flag (PSR.N) is set
+IF PSR.N
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[9C]
+JL $operand
+* Jump to address in $operand if negative flag (PSR.N) is set
+IF PSR.N
+PC<-[IR.$operand]
+
+[9D]
+JL ($operand)
+* Jump to indirect address in $operand if negative flag (PSR.N) is set
+IF PSR.N
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[9E]
+JL $word
+* Jump to address in following $word if negative flag (PSR.N) is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.N
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[9F]
+JL ($word)
+* Jump to indirect address in following $word if negative flag (PSR.N) is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.N
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+// JGE
+[A0]
+JGE %AX
+* Jump to address in AX if negative flag (PSR.N) is not set
+IF NOT PSR.N
+PC<-[AX]
+
+[A1]
+JGE (%AX)
+* Jump to indirect address in AX if negative flag (PSR.N) is not set
+IF NOT PSR.N
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[A2]
+JGE %BX
+* Jump to address in BX if negative flag (PSR.N) is not set
+IF NOT PSR.N
+PC<-[BX]
+
+[A3]
+JGE (%BX)
+* Jump to indirect address in BX if negative flag (PSR.N) is not set
+IF NOT PSR.N
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[A4]
+JGE $operand
+* Jump to address in $operand if negative flag (PSR.N) is not set
+IF NOT PSR.N
+PC<-[IR.$operand]
+
+[A5]
+JGE ($operand)
+* Jump to indirect address in $operand if negative flag (PSR.N) is not set
+IF NOT PSR.N
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[A6]
+JGE $word
+* Jump to address in following $word if negative flag (PSR.N) is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.N
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[A7]
+JGE ($word)
+* Jump to indirect address in following $word if negative flag (PSR.N) is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.N
+MDR<-[M[MAR]]
+MAR<-[MDR]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Jump on overflow
+//////////////////////////////////////////////////////////////////////////////// 
+
+[A8]
+JC %AX
+* Jump to address in %AX if carry flag [PSR.C] is set
+IF PSR.C
+PC<-[AX]
+
+[A9]
+JC %BX
+* Jump to address in %BX if carry flag [PSR.C] is set
+IF PSR.C
+PC<-[BX]
+
+[AA]
+JC $operand
+* Jump to address in byte if carry flag [PSR.C] is set
+IF PSR.C
+PC<-[IR.lowbyte]
+
+[AB]
+JC $word
+* Jump to address in following word if carry flag [PSR.C] is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.C
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[AC]
+JV %AX
+* Jump to address in %AX if overflow flag [PSR.V] is set
+IF PSR.V
+PC<-[AX]
+
+[AD]
+JV %BX
+* Jump to address in %BX if overflow flag [PSR.V] is set
+IF PSR.V
+PC<-[BX]
+
+[AE]
+JV $operand
+* Jump to address in byte if overflow flag [PSR.V] is set
+IF PSR.V
+PC<-[IR.lowbyte]
+
+[AF]
+JV $word
+* Jump to address in following word if overflow flag [PSR.V] is set
+MAR<-[PC]
+PC=[PC]+1
+IF PSR.V
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+[B0]
+JNC %AX
+* Jump to address in %AX if carry flag [PSR.C] is not set
+IF NOT PSR.C
+PC<-[AX]
+
+[B1]
+JNC %BX
+* Jump to address in %BX if carry flag [PSR.C] is not set
+IF NOT PSR.C
+PC<-[BX]
+
+[B2]
+JNC $operand
+* Jump to address in byte if carry flag [PSR.C] is not set
+IF NOT PSR.C
+PC<-[IR.lowbyte]
+
+[B3]
+JNC $word
+* Jump to address in following word if carry flag [PSR.C] is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.C
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[B4]
+JNV %AX
+* Jump to address in %AX if overflow flag [PSR.V] is not set
+IF NOT PSR.V
+PC<-[AX]
+
+[B5]
+JNV %BX
+* Jump to address in %BX if overflow flag [PSR.V] is not set
+IF NOT PSR.V
+PC<-[BX]
+
+[B6]
+JNV $operand
+* Jump to address in byte if overflow flag [PSR.V] is not set
+IF NOT PSR.V
+PC<-[IR.lowbyte]
+
+[B7]
+JNV $word
+* Jump to address in following word if overflow flag [PSR.V] is not set
+MAR<-[PC]
+PC=[PC]+1
+IF NOT PSR.V
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+
+////////////////////////////////////////////////////////////////////////////////
+// PUSH
+////////////////////////////////////////////////////////////////////////////////
+
+[B9]
+PUSH %AX
+* Push AX onto the stack
+MDR<-[AX]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+
+[BA]
+PUSH %BX
+* Push BX onto the stack
+MDR<-[BX]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+
+[BB]
+PUSH $operand
+* Push $operand onto the stack
+MDR<-[IR.$operand]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+
+[BC]
+PUSH ($operand)
+* Push memory value indexed by $operand onto the stack
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+
+[BD]
+PUSH $word
+* Push following $word onto the stack
+MAR<-[PC]
+PC=[PC]+1
+MDR<-[M[MAR]]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+
+
+////////////////////////////////////////////////////////////////////////////////
+// POP
+////////////////////////////////////////////////////////////////////////////////
+
+[BE]
+POP %AX
+* pop the stack to AX
+ALUx<-[SP]
+ALUr=[ALUx]+1
+SP<-[ALUr]
+MAR<-[SP]    
+MDR<-[M[MAR]]
+AX<-[MDR]
+
+[BF]
+POP %BX
+* pop the stack to BX
+ALUx<-[SP]
+ALUr=[ALUx]+1
+SP<-[ALUr]
+MAR<-[SP]    
+MDR<-[M[MAR]]
+BX<-[MDR]
+
+//////////////////////////////////////////////////////////////////////////
+// CALL and RET
+//////////////////////////////////////////////////////////////////////////
+
+[C0]
+CALL %AX
+* Subroutine jump to direct address in AX
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+PC<-[AX]
+
+[C1]
+CALL %BX
+* Subroutine jump to direct address in BX
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+PC<-[BX]
+
+[C2]
+CALL (%AX)
+* Subroutine jump to indirect address in AX
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+MAR<-[AX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[C3]
+CALL (%BX)
+* Subroutine jump to indirect address in BX
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+MAR<-[BX]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[C4]
+CALL $operand
+* Subroutine jump to direct address in $operand
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+PC<-[IR.$operand]
+
+[C5]
+CALL ($operand)
+* Subroutine jump to indirect address in $operand
+MDR<-[PC]
+MAR<-[SP]
+M[MAR]<-[MDR]
+ALUx<-[SP]
+ALUr=[ALUx]-1
+SP<-[ALUr]
+MAR<-[IR.$operand]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+[C6]
+CALL $word
+* Subroutine jump to direct address in following $word (c)
+PC=[PC]+1			// Go to the address after the $word
+MAR<-[SP]				// Write it to the stack
+MDR<-[PC]				//
+M[MAR]<-[MDR]				//
+ALUx<-[SP]			// Decrement the stack pointer
+ALUr=[ALUx]-1			//
+SP<-[ALUr]			//
+ALUx<-[PC]				// Get the address of the $word
+ALUr=[ALUx]-1				// 
+MAR<-[ALUr]			// Read it
+MDR<-[M[MAR]]			//
+PC<-[MDR]				// Jump to it
+
+[C7]
+CALL ($word)
+* Subroutine jump to indirect address in following $word
+PC=[PC]+1			// Go to the address after the $word
+MAR<-[SP]				// Write it to the stack
+MDR<-[PC]				//
+M[MAR]<-[MDR]				//
+ALUx<-[SP]			// Decrement the stack pointer
+ALUr=[ALUx]-1			//
+SP<-[ALUr]			//
+ALUx<-[PC]				// Get the address of the $word
+ALUr=[ALUx]-1				// 
+MAR<-[ALUr]			// Read it
+MDR<-[M[MAR]]			//
+MAR<-[MDR]				// Read the indirect address
+MDR<-[M[MAR]]				//
+PC<-[MDR]			// Jump to it
+
+// RET
+[CA]
+RET
+* Return from subroutine call
+ALUx<-[SP]
+ALUr=[ALUx]+1
+SP<-[ALUr]
+MAR<-[SP]
+MDR<-[M[MAR]]
+PC<-[MDR]
+
+///////////////////////////////////////////////////////////
+// HALT
+//////////////////////////////////////////////////////////
+[EE]
+HALT
+* Stops the program
+STOP
+
+
