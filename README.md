@@ -4,7 +4,7 @@ It is a simple calculator implemented in Assembly code, capable of performing ba
 The software used was custom-made; it did not include some basic functions a typical CPU has, and the 3rd and 4th gates could not be used.
 This gave me practical experience writing and debugging Assembly code, understanding how the CPU works and its inner functions and allowed me to learn about arithmetic logic in a low-level enviroment.
 
-# HOW TO USE
+# Downloading and extraction
 Once you have downloaded the files, extract them to a folder or to the desktop.
 
 # To view the raw assembly code:
