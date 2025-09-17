@@ -1,6 +1,6 @@
 # Assembly-Calculator
 This project was developed as part of a university assessment under a tight deadline.
-It is a simple calculator implemented in Assembly code, capable of performing basic arithmetic operations (addition and subtraction).
+It is a simple calculator implemented in Assembly code, capable of performing basic arithmetic operations (addition, subtraction, error handling and a quit feature).
 The software used was custom-made; it did not include some basic functions a typical CPU has, and the 3rd and 4th gates could not be used.
 This gave me practical experience writing and debugging Assembly code, understanding how the CPU works and its inner functions and allowed me to learn about arithmetic logic in a low-level enviroment.
 
